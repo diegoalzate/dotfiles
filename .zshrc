@@ -93,12 +93,9 @@ eval "$(starship init zsh)"
 alias ls='ls --color'
 alias pn=pnpm
 alias lg=lazygit
-alias c="zed"
+alias c="cursor"
 
 # PATHS
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-
 
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
@@ -117,3 +114,6 @@ export PATH=$PATH:$GOPATH/bin
 
 # brew
 eval $(/opt/homebrew/bin/brew shellenv)
+
+# fnm
+eval "$(fnm env --use-on-cd)"
