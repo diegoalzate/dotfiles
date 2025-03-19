@@ -1,3 +1,5 @@
+export NODE_EXTRA_CA_CERTS=~/caadmin.netskope.com.pem
+
 ### Added by Zinit's installer
 if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
     print -P "%F{33} %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} Initiative Plugin Manager (%F{33}zdharma-continuum/zinit%F{220})…%f"
@@ -93,12 +95,9 @@ eval "$(starship init zsh)"
 alias ls='ls --color'
 alias pn=pnpm
 alias lg=lazygit
-alias c="zed"
+alias c="cursor"
 
 # PATHS
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-
 
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
@@ -117,3 +116,6 @@ export PATH=$PATH:$GOPATH/bin
 
 # brew
 eval $(/opt/homebrew/bin/brew shellenv)
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+eval "$(fnm env --use-on-cd --shell zsh)"
