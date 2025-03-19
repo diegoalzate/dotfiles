@@ -41,18 +41,16 @@ unstow:
 	stow -D -t ~ .
 	@echo "Unstow complete!"
 
-# Update Homebrew packages
-brew-update:
-	@echo "Updating Homebrew packages..."
-	brew update
-	brew upgrade
-	@echo "Homebrew update complete!"
-
 # Update Brewfile
 brew-dump:
 	@echo "Updating Brewfile..."
 	brew bundle dump --force
 	@echo "Brewfile updated! Don't forget to commit the changes."
+
+brew-install:
+	@echo "Installing Homebrew packages..."
+	brew bundle install
+	@echo "Homebrew install complete!"
 
 # Reload ZSH
 zsh-reload:
