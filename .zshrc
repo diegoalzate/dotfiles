@@ -116,6 +116,6 @@ export PATH=$PATH:$GOPATH/bin
 
 # brew
 eval $(/opt/homebrew/bin/brew shellenv)
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-eval "$(fnm env --use-on-cd --shell zsh)"
+# fnm
+eval "$(fnm env --use-on-cd)"

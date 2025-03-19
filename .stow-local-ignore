@@ -1,0 +1,9 @@
+# Ignore these files when stowing
+README.md
+Makefile
+.git
+.gitignore
+.stow-local-ignore
+Brewfile
+LICENSE
+
