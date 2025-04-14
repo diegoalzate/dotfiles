@@ -27,7 +27,6 @@ zinit light zsh-users/zsh-syntax-highlighting
 zinit light Aloxaf/fzf-tab
 zinit light jirutka/zsh-shift-select
 zinit light kutsan/zsh-system-clipboard
-zinit ice atload"zpcdreplay" atclone"./zplug.zsh" atpull"%atclone"
 zinit light g-plane/pnpm-shell-completion
 
 # Add in snippets
