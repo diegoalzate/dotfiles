@@ -27,6 +27,8 @@ zinit light zsh-users/zsh-syntax-highlighting
 zinit light Aloxaf/fzf-tab
 zinit light jirutka/zsh-shift-select
 zinit light kutsan/zsh-system-clipboard
+zinit ice atload"zpcdreplay" atclone"./zplug.zsh" atpull"%atclone"
+zinit light g-plane/pnpm-shell-completion
 
 # Add in snippets
 zinit snippet OMZL::git.zsh
@@ -119,3 +121,6 @@ eval $(/opt/homebrew/bin/brew shellenv)
 
 # fnm
 eval "$(fnm env --use-on-cd)"
+
+# Created by `pipx` on 2025-04-11 15:13:27
+export PATH="$PATH:/Users/diego.alzate/.local/bin"
