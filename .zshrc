@@ -96,7 +96,7 @@ eval "$(starship init zsh)"
 alias ls='ls --color'
 alias pn=pnpm
 alias lg=lazygit
-alias c="windsurf"
+alias c="cursor"
 
 # PATHS
 
