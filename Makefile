@@ -1,15 +1,13 @@
-.PHONY: help install update stow unstow brew-update brew-dump zsh-reload
+.PHONY: help install sync save stow brew
 
 # Default target
 help:
 	@echo "Available commands:"
-	@echo "  make install     - First-time setup (Homebrew, dependencies, stow, zinit)"
-	@echo "  make update      - Update dotfiles (git pull, brew update, re-stow)"
-	@echo "  make stow        - Symlink dotfiles to home directory"
-	@echo "  make unstow      - Remove symlinks from home directory"
-	@echo "  make brew-update - Update Homebrew packages"
-	@echo "  make brew-dump   - Update Brewfile with current packages"
-	@echo "  make zsh-reload  - Reload ZSH configuration"
+	@echo "  make install - First-time setup"
+	@echo "  make sync    - Pull from repo and apply to system"
+	@echo "  make save    - Save current system state to repo"
+	@echo "  make stow    - Apply config files"
+	@echo "  make brew    - Update Homebrew packages"
 
 # First-time installation
 install:
@@ -20,39 +18,28 @@ install:
 	bash -c "$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/zdharma-continuum/zinit/HEAD/scripts/install.sh)" || true
 	@echo "Installation complete! Please restart your terminal or run 'source ~/.zshrc'"
 
-# Update dotfiles
-update:
-	@echo "Updating dotfiles..."
+# Pull from repo and apply to system
+sync:
+	@echo "Syncing from repo..."
 	git pull
-	brew update
-	brew upgrade
+	brew update && brew upgrade
 	stow -R -v -t ~ .
-	@echo "Update complete! Please restart your terminal or run 'source ~/.zshrc'"
+	@echo "Sync complete! Please restart your terminal or run 'source ~/.zshrc'"
 
-# Stow dotfiles
-stow:
-	@echo "Stowing dotfiles..."
-	stow -v -t ~ .
-	@echo "Stow complete!"
-
-# Unstow dotfiles
-unstow:
-	@echo "Unstowing dotfiles..."
-	stow -D -t ~ .
-	@echo "Unstow complete!"
-
-# Update Brewfile
-brew-dump:
-	@echo "Updating Brewfile..."
+# Save current system state to repo
+save:
+	@echo "Saving current system state..."
 	brew bundle dump --force
-	@echo "Brewfile updated! Don't forget to commit the changes."
+	@echo "System state saved to Brewfile!"
 
-brew-install:
-	@echo "Installing Homebrew packages..."
-	brew bundle install
-	@echo "Homebrew install complete!"
+# Apply config files
+stow:
+	@echo "Applying config files..."
+	stow -R -v -t ~ .
+	@echo "Config files applied!"
 
-# Reload ZSH
-zsh-reload:
-	@echo "Reloading ZSH configuration..."
-	source ~/.zshrc || echo "Please run 'source ~/.zshrc' manually"
+# Update Homebrew packages
+brew:
+	@echo "Updating Homebrew packages..."
+	brew update && brew upgrade
+	@echo "Homebrew packages updated!"

@@ -127,5 +127,3 @@ eval "$(fnm env --use-on-cd)"
 # Created by `pipx` on 2025-04-11 15:13:27
 export PATH="$PATH:/Users/diego.alzate/.local/bin"
 
-# Added by Windsurf
-export PATH="/Users/diego.alzate/.codeium/windsurf/bin:$PATH"
