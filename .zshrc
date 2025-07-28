@@ -99,7 +99,7 @@ eval "$(starship init zsh)"
 alias ls='ls --color'
 alias pn=pnpm
 alias lg=lazygit
-alias c="cursor"
+alias c="code"
 
 # PATHS
 
@@ -126,3 +126,4 @@ eval "$(fnm env --use-on-cd)"
 
 # Created by `pipx` on 2025-04-11 15:13:27
 export PATH="$PATH:/Users/diego.alzate/.local/bin"
+export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
