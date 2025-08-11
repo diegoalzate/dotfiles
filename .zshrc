@@ -129,4 +129,4 @@ export PATH="$PATH:/Users/diego.alzate/.local/bin"
 export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
 
 # azure foundry
-export AZURE_RESOURCE_NAME=azure-cognitive-7jiiq
+export AZURE_RESOURCE_NAME=azure-cognitive-uortz
