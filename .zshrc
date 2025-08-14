@@ -127,6 +127,3 @@ eval "$(fnm env --use-on-cd)"
 # Created by `pipx` on 2025-04-11 15:13:27
 export PATH="$PATH:/Users/diego.alzate/.local/bin"
 export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
-
-# azure foundry
-export AZURE_RESOURCE_NAME=azure-cognitive-uortz
