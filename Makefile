@@ -38,6 +38,11 @@ stow:
 	stow -R -v -t ~ .
 	@echo "Config files applied!"
 
+stow-unsafe:
+	@echo "Applying config files (unsafe)..."
+	stow --adopt -R -v -t ~  .
+	@echo "Config files applied!"
+
 # Update Homebrew packages
 brew:
 	@echo "Updating Homebrew packages..."
