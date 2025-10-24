@@ -1,12 +1,6 @@
-# Ignore these files when stowing
-README.md
-Makefile
-.git
-.gitignore
-.stow-local-ignore
-Brewfile
-LICENSE
+# Ignore everything by default
+.*
 
-# Ignore everything in .config/zed except settings.json
-.config/zed/*
+# But include these specific files/directories
+!.zshrc
 !.config/zed/settings.json
