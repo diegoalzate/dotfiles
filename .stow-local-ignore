@@ -7,3 +7,6 @@ Makefile
 Brewfile
 LICENSE
 
+# Ignore everything in .config/zed except settings.json
+.config/zed/*
+!.config/zed/settings.json
