@@ -3,4 +3,3 @@
 
 # But include these specific files/directories
 !.zshrc
-!.config/zed/settings.json

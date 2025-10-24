@@ -23,7 +23,7 @@ sync:
 	@echo "Syncing from repo..."
 	git pull
 	brew update && brew upgrade
-	stow -R -v -t ~ .
+	make stow
 	@echo "Sync complete! Please restart your terminal or run 'source ~/.zshrc'"
 
 # Save current system state to repo
@@ -35,7 +35,9 @@ save:
 # Apply config files
 stow:
 	@echo "Applying config files..."
-	stow -R -v -t ~ .
+	stow -v -t ~ .
+	mkdir -p ~/.config/zed
+	ln -sf $(PWD)/zed-settings.json ~/.config/zed/settings.json
 	@echo "Config files applied!"
 
 stow-unsafe:
