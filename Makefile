@@ -1,4 +1,5 @@
-.PHONY: help install sync save stow brew
+SHELL := /bin/bash
+.PHONY: help install sync save stow brew doctor
 
 # Default target
 help:
@@ -8,6 +9,7 @@ help:
 	@echo "  make save    - Save current system state to repo"
 	@echo "  make stow    - Apply config files"
 	@echo "  make brew    - Update Homebrew packages"
+	@echo "  make doctor  - Check and fix broken symlinks"
 
 # First-time installation
 install:
@@ -50,3 +52,76 @@ brew:
 	@echo "Updating Homebrew packages..."
 	brew update && brew upgrade
 	@echo "Homebrew packages updated!"
+
+# Check and fix broken symlinks
+doctor:
+	@DOTFILES_DIR="$$(pwd)"; \
+	echo "Checking dotfiles health..."; \
+	echo "Dotfiles location: $$DOTFILES_DIR"; \
+	echo ""; \
+	ISSUES=0; \
+	\
+	echo -n "~/.zshrc: "; \
+	if [ -L ~/.zshrc ]; then \
+		TARGET=$$(readlink ~/.zshrc); \
+		if [ -e ~/.zshrc ]; then \
+			RESOLVED=$$(cd ~ && cd "$$(dirname "$$TARGET")" 2>/dev/null && pwd)/$$(basename "$$TARGET"); \
+			if [ "$$RESOLVED" = "$$DOTFILES_DIR/.zshrc" ]; then \
+				echo "✓ OK"; \
+			else \
+				echo "⚠ Points to wrong location: $$TARGET"; \
+				ISSUES=1; \
+			fi; \
+		else \
+			echo "✗ Broken symlink -> $$TARGET"; \
+			ISSUES=1; \
+		fi; \
+	elif [ -e ~/.zshrc ]; then \
+		echo "⚠ Exists but is not a symlink"; \
+		ISSUES=1; \
+	else \
+		echo "✗ Missing"; \
+		ISSUES=1; \
+	fi; \
+	\
+	echo -n "~/.config/zed/settings.json: "; \
+	if [ -L ~/.config/zed/settings.json ]; then \
+		TARGET=$$(readlink ~/.config/zed/settings.json); \
+		if [ -e ~/.config/zed/settings.json ]; then \
+			if [ "$$TARGET" = "$$DOTFILES_DIR/zed-settings.json" ]; then \
+				echo "✓ OK"; \
+			else \
+				echo "⚠ Points to wrong location: $$TARGET"; \
+				ISSUES=1; \
+			fi; \
+		else \
+			echo "✗ Broken symlink -> $$TARGET"; \
+			ISSUES=1; \
+		fi; \
+	elif [ -e ~/.config/zed/settings.json ]; then \
+		echo "⚠ Exists but is not a symlink"; \
+		ISSUES=1; \
+	else \
+		echo "✗ Missing"; \
+		ISSUES=1; \
+	fi; \
+	\
+	echo ""; \
+	if [ $$ISSUES -eq 1 ]; then \
+		read -p "Issues found. Would you like to fix them? [y/N] " REPLY; \
+		if [ "$$REPLY" = "y" ] || [ "$$REPLY" = "Y" ]; then \
+			echo "Fixing..."; \
+			[ -L ~/.zshrc ] && rm ~/.zshrc || true; \
+			[ -L ~/.config/zed/settings.json ] && rm ~/.config/zed/settings.json || true; \
+			[ -f ~/.zshrc ] && echo "Warning: ~/.zshrc is a regular file, not removing" || true; \
+			stow -v -t ~ .; \
+			mkdir -p ~/.config/zed; \
+			ln -sf "$$DOTFILES_DIR/zed-settings.json" ~/.config/zed/settings.json; \
+			echo ""; \
+			echo "✓ Fixed! Run 'source ~/.zshrc' to reload your shell."; \
+		else \
+			echo "No changes made."; \
+		fi; \
+	else \
+		echo "All symlinks are healthy!"; \
+	fi

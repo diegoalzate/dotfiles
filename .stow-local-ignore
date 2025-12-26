@@ -1,5 +1,17 @@
-# Ignore everything by default
-.*
+# Files to ignore when stowing
+# Note: .zshrc is NOT listed here so it WILL be stowed
 
-# But include these specific files/directories
-!.zshrc
+# Git
+\.git
+
+# Stow's own ignore file
+\.stow-local-ignore
+
+# Documentation and config (not dotfiles)
+AGENTS\.md
+README\.md
+Makefile
+Brewfile
+
+# Zed settings (handled manually via ln -sf in Makefile)
+zed-settings\.json
