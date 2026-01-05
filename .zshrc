@@ -44,6 +44,12 @@ zinit cdreplay -q
 
 ### End of Zinit's installer chunk
 
+# OS Detection
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    IS_MACOS=true
+else
+    IS_MACOS=false
+fi
 
 # key bindings
 bindkey '^p' history-search-backward
@@ -94,7 +100,11 @@ eval "$(starship init zsh)"
 alias ls='ls --color'
 alias pn=pnpm
 alias lg=lazygit
-alias c="zed"
+if $IS_MACOS; then
+    alias c="zed"
+else
+    alias c="code"
+fi
 
 # PATHS
 
@@ -106,19 +116,29 @@ export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
 # pnpm
-export PNPM_HOME="$HOME/Library/pnpm"
+if $IS_MACOS; then
+    export PNPM_HOME="$HOME/Library/pnpm"
+else
+    export PNPM_HOME="$HOME/.local/share/pnpm"
+fi
 export PATH="$PNPM_HOME:$PATH"
 
 # go
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 
-# brew
-eval $(/opt/homebrew/bin/brew shellenv)
+# brew (macOS only)
+if $IS_MACOS; then
+    eval $(/opt/homebrew/bin/brew shellenv)
+fi
 
 # fnm
 eval "$(fnm env --use-on-cd)"
 
-# Created by `pipx` on 2025-04-11 15:13:27
-export PATH="$PATH:/Users/diego.alzate/.local/bin"
-export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
+# pipx
+export PATH="$PATH:$HOME/.local/bin"
+
+# dyld (macOS only)
+if $IS_MACOS; then
+    export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
+fi
