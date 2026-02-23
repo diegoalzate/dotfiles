@@ -44,6 +44,17 @@ zinit cdreplay -q
 
 ### End of Zinit's installer chunk
 
+# Platform helpers
+if [[ "$OSTYPE" == darwin* ]]; then
+  IS_MACOS=true
+else
+  IS_MACOS=false
+fi
+
+has_cmd() {
+  command -v "$1" >/dev/null 2>&1
+}
+
 
 # key bindings
 bindkey '^p' history-search-backward
@@ -79,22 +90,38 @@ setopt hist_find_no_dups
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*' menu no
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
-zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
+
+if ls --color=always >/dev/null 2>&1; then
+  FZF_TAB_LS_PREVIEW='ls --color=always'
+else
+  FZF_TAB_LS_PREVIEW='ls -G'
+fi
+
+zstyle ':fzf-tab:complete:cd:*' fzf-preview "${FZF_TAB_LS_PREVIEW} \$realpath"
+zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview "${FZF_TAB_LS_PREVIEW} \$realpath"
 
 # Shell integrations
-eval "$(fzf --zsh)"
-eval "$(zoxide init --cmd cd zsh)"
-eval "$(starship init zsh)"
+has_cmd fzf && eval "$(fzf --zsh)"
+has_cmd zoxide && eval "$(zoxide init --cmd cd zsh)"
+has_cmd starship && eval "$(starship init zsh)"
 
 # end of zsh plugins config
 
 # Aliases
 
-alias ls='ls --color'
+if ls --color=auto >/dev/null 2>&1; then
+  alias ls='ls --color=auto'
+elif ls -G >/dev/null 2>&1; then
+  alias ls='ls -G'
+fi
+
 alias pn=pnpm
 alias lg=lazygit
-alias c="zed"
+if has_cmd zed; then
+  alias c="zed"
+elif has_cmd code; then
+  alias c="code"
+fi
 
 # PATHS
 
@@ -106,7 +133,11 @@ export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
 # pnpm
-export PNPM_HOME="$HOME/Library/pnpm"
+if $IS_MACOS; then
+  export PNPM_HOME="$HOME/Library/pnpm"
+else
+  export PNPM_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/pnpm"
+fi
 export PATH="$PNPM_HOME:$PATH"
 
 # go
@@ -114,11 +145,20 @@ export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 
 # brew
-eval $(/opt/homebrew/bin/brew shellenv)
+if $IS_MACOS; then
+  if [ -x /opt/homebrew/bin/brew ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif has_cmd brew; then
+    eval "$(brew shellenv)"
+  fi
+fi
 
 # fnm
-eval "$(fnm env --use-on-cd)"
+has_cmd fnm && eval "$(fnm env --use-on-cd)"
 
 # Created by `pipx` on 2025-04-11 15:13:27
-export PATH="$PATH:/Users/diego.alzate/.local/bin"
-export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
+export PATH="$PATH:$HOME/.local/bin"
+
+if $IS_MACOS; then
+  export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
+fi

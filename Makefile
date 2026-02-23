@@ -1,61 +1,90 @@
 SHELL := /bin/bash
-.PHONY: help install sync save stow brew doctor
 
-# Default target
+UNAME_S := $(shell uname -s)
+DOTFILES_DIR := $(CURDIR)
+LINUX_INSTALLER := ./install-linux.sh
+
+.PHONY: help install install-macos install-linux sync save stow stow-unsafe brew doctor
+
 help:
 	@echo "Available commands:"
-	@echo "  make install - First-time setup"
-	@echo "  make sync    - Pull from repo and apply to system"
-	@echo "  make save    - Save current system state to repo"
-	@echo "  make stow    - Apply config files"
-	@echo "  make brew    - Update Homebrew packages"
-	@echo "  make doctor  - Check and fix broken symlinks"
+	@echo "  make install       - First-time setup (auto-detects OS)"
+	@echo "  make install-macos - macOS setup (Homebrew + stow + zinit)"
+	@echo "  make install-linux - Linux/WSL setup (apt + stow)"
+	@echo "  make sync          - Pull from repo and re-apply config files"
+	@echo "  make save          - Save Homebrew state to Brewfile (macOS only)"
+	@echo "  make stow          - Apply config files"
+	@echo "  make stow-unsafe   - Apply config files with --adopt"
+	@echo "  make brew          - Update Homebrew packages (macOS only)"
+	@echo "  make doctor        - Check and fix broken symlinks"
 
-# First-time installation
 install:
-	@echo "Installing dotfiles..."
-	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || true
+	@case "$(UNAME_S)" in \
+		Darwin) $(MAKE) install-macos ;; \
+		Linux) $(MAKE) install-linux ;; \
+		*) echo "Unsupported OS: $(UNAME_S)"; exit 1 ;; \
+	esac
+
+install-macos:
+	@echo "Installing dotfiles on macOS..."
+	@if ! command -v brew >/dev/null 2>&1; then \
+		/bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || true; \
+	fi
 	brew bundle
-	stow -v -t ~ .
-	bash -c "$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/zdharma-continuum/zinit/HEAD/scripts/install.sh)" || true
+	$(MAKE) stow
+	bash -c "$$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/zdharma-continuum/zinit/HEAD/scripts/install.sh)" || true
 	@echo "Installation complete! Please restart your terminal or run 'source ~/.zshrc'"
 
-# Pull from repo and apply to system
+install-linux:
+	@echo "Installing dotfiles on Linux/WSL..."
+	@if [ ! -f "$(LINUX_INSTALLER)" ]; then \
+		echo "Missing $(LINUX_INSTALLER)"; \
+		exit 1; \
+	fi
+	chmod +x "$(LINUX_INSTALLER)"
+	"$(LINUX_INSTALLER)"
+
 sync:
 	@echo "Syncing from repo..."
 	git pull
+ifeq ($(UNAME_S),Darwin)
 	brew update && brew upgrade
-	make stow
+endif
+	$(MAKE) stow
 	@echo "Sync complete! Please restart your terminal or run 'source ~/.zshrc'"
 
-# Save current system state to repo
 save:
-	@echo "Saving current system state..."
+ifeq ($(UNAME_S),Darwin)
+	@echo "Saving current Homebrew state..."
 	brew bundle dump --force
 	@echo "System state saved to Brewfile!"
+else
+	@echo "make save is only available on macOS (Brewfile export)."
+endif
 
-# Apply config files
 stow:
 	@echo "Applying config files..."
 	stow -v -t ~ .
 	mkdir -p ~/.config/zed
-	ln -sf $(PWD)/zed-settings.json ~/.config/zed/settings.json
+	ln -sf "$(DOTFILES_DIR)/zed-settings.json" ~/.config/zed/settings.json
 	@echo "Config files applied!"
 
 stow-unsafe:
 	@echo "Applying config files (unsafe)..."
-	stow --adopt -R -v -t ~  .
+	stow --adopt -R -v -t ~ .
 	@echo "Config files applied!"
 
-# Update Homebrew packages
 brew:
+ifeq ($(UNAME_S),Darwin)
 	@echo "Updating Homebrew packages..."
 	brew update && brew upgrade
 	@echo "Homebrew packages updated!"
+else
+	@echo "make brew is only available on macOS."
+endif
 
-# Check and fix broken symlinks
 doctor:
-	@DOTFILES_DIR="$$(pwd)"; \
+	@DOTFILES_DIR="$(DOTFILES_DIR)"; \
 	echo "Checking dotfiles health..."; \
 	echo "Dotfiles location: $$DOTFILES_DIR"; \
 	echo ""; \
@@ -67,20 +96,20 @@ doctor:
 		if [ -e ~/.zshrc ]; then \
 			RESOLVED=$$(cd ~ && cd "$$(dirname "$$TARGET")" 2>/dev/null && pwd)/$$(basename "$$TARGET"); \
 			if [ "$$RESOLVED" = "$$DOTFILES_DIR/.zshrc" ]; then \
-				echo "✓ OK"; \
+				echo "OK"; \
 			else \
-				echo "⚠ Points to wrong location: $$TARGET"; \
+				echo "Points to wrong location: $$TARGET"; \
 				ISSUES=1; \
 			fi; \
 		else \
-			echo "✗ Broken symlink -> $$TARGET"; \
+			echo "Broken symlink -> $$TARGET"; \
 			ISSUES=1; \
 		fi; \
 	elif [ -e ~/.zshrc ]; then \
-		echo "⚠ Exists but is not a symlink"; \
+		echo "Exists but is not a symlink"; \
 		ISSUES=1; \
 	else \
-		echo "✗ Missing"; \
+		echo "Missing"; \
 		ISSUES=1; \
 	fi; \
 	\
@@ -88,21 +117,22 @@ doctor:
 	if [ -L ~/.config/zed/settings.json ]; then \
 		TARGET=$$(readlink ~/.config/zed/settings.json); \
 		if [ -e ~/.config/zed/settings.json ]; then \
-			if [ "$$TARGET" = "$$DOTFILES_DIR/zed-settings.json" ]; then \
-				echo "✓ OK"; \
+			RESOLVED=$$(cd ~/.config/zed && cd "$$(dirname "$$TARGET")" 2>/dev/null && pwd)/$$(basename "$$TARGET"); \
+			if [ "$$RESOLVED" = "$$DOTFILES_DIR/zed-settings.json" ]; then \
+				echo "OK"; \
 			else \
-				echo "⚠ Points to wrong location: $$TARGET"; \
+				echo "Points to wrong location: $$TARGET"; \
 				ISSUES=1; \
 			fi; \
 		else \
-			echo "✗ Broken symlink -> $$TARGET"; \
+			echo "Broken symlink -> $$TARGET"; \
 			ISSUES=1; \
 		fi; \
 	elif [ -e ~/.config/zed/settings.json ]; then \
-		echo "⚠ Exists but is not a symlink"; \
+		echo "Exists but is not a symlink"; \
 		ISSUES=1; \
 	else \
-		echo "✗ Missing"; \
+		echo "Missing"; \
 		ISSUES=1; \
 	fi; \
 	\
@@ -114,11 +144,9 @@ doctor:
 			[ -L ~/.zshrc ] && rm ~/.zshrc || true; \
 			[ -L ~/.config/zed/settings.json ] && rm ~/.config/zed/settings.json || true; \
 			[ -f ~/.zshrc ] && echo "Warning: ~/.zshrc is a regular file, not removing" || true; \
-			stow -v -t ~ .; \
-			mkdir -p ~/.config/zed; \
-			ln -sf "$$DOTFILES_DIR/zed-settings.json" ~/.config/zed/settings.json; \
+			$(MAKE) stow; \
 			echo ""; \
-			echo "✓ Fixed! Run 'source ~/.zshrc' to reload your shell."; \
+			echo "Fixed! Run 'source ~/.zshrc' to reload your shell."; \
 		else \
 			echo "No changes made."; \
 		fi; \

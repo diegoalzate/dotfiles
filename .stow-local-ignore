@@ -12,6 +12,7 @@ AGENTS\.md
 README\.md
 Makefile
 Brewfile
+install-linux\.sh
 
 # Zed settings (handled manually via ln -sf in Makefile)
 zed-settings\.json

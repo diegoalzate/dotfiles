@@ -1,8 +1,6 @@
 {
-  "features": {
-    "edit_prediction_provider": "copilot"
-  },
   "edit_predictions": {
+    "provider": "copilot",
     "mode": "subtle",
     "copilot": {
       "proxy": null,
@@ -13,7 +11,9 @@
   },
   "icon_theme": "Catppuccin Macchiato",
   "agent": {
-    "always_allow_tool_actions": true,
+    "tool_permissions": {
+      "default": "confirm"
+    },
     "default_profile": "ask",
     "default_model": {
       "provider": "copilot_chat",
@@ -23,6 +23,10 @@
   },
   "terminal": {
     "dock": "left"
+  },
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
   },
   "outline_panel": {
     "dock": "right"
